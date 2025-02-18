@@ -1,135 +1,86 @@
 # Examination System
 
 ## Overview
-The Examination System is a comprehensive solution designed to streamline exam management in an academic environment. It allows instructors to create and manage exams, manually or randomly select questions, and automatically grade student submissions. Students can register for exams, submit answers for multiple types of questions, and receive feedback on their performance.
+The **Examination System** is a comprehensive solution for managing exams in an academic environment. It allows instructors to create exams, students to take them, and the system to evaluate answers automatically.
 
 ## Features
-- **Exam Creation:**  
-  - Instructors can create exams by manually selecting questions or using random selection.
-  - The system validates exam parameters (e.g., total grade, question counts) and ensures that the instructor is authorized for the course.
+### Exam Management
+- Create exams manually by selecting questions from a question bank.
+- Automatically generate exams with random questions.
+- Define total exam marks, start and end times, and exam type.
 
-- **Student Registration:**  
-  - Students are registered to specific exams.
-  - Only registered students can submit answers.
+### Question Bank
+- Supports **Multiple Choice Questions (MCQ), True/False, and Open-Ended questions**.
+- Stores correct answers for automated grading.
 
-- **Answer Submission:**  
-  - Supports multiple question types:
-    - **Multiple Choice (MCQ)**
-    - **True/False**
-    - **Open-Ended** (with keyword-based grading)
-  - Students submit answers using a dedicated stored procedure.
+### Student Interaction
+- Students can register for exams.
+- Answers are stored and automatically graded for MCQ and True/False.
+- Open-ended answers are reviewed by instructors.
 
-- **Automated Grading:**  
-  - The system automatically calculates the exam score by evaluating:
-    - MCQs: Full credit for correct answers.
-    - True/False: Full credit if the answer matches the correct answer.
-    - Open-Ended: Partial credit is awarded based on keyword matching.
-  - The total score is updated in the student exam record.
+### Grading System
+- Automated grading for MCQs and True/False questions.
+- Keyword-based evaluation for open-ended answers.
+- Instructors can review and override grades.
 
-- **User Management & Permissions:**  
-  - Role-based access control for instructors and students.
-  - Fine-grained permissions for database objects (stored procedures, views, tables, etc.).
+### Security & Permissions
+- Role-based access control for **Admin, Training Manager, Instructor, and Student**.
+- Restricted access to exam records.
+- Enforced constraints to maintain data integrity.
 
 ## Database Structure
-The system's database includes several key modules:
-- **User Management:**  
-  - Contains `Account`, `Instructor`, and `Student` tables for handling authentication and authorization.
-  
-- **Academic Records:**  
-  - Manages student information, course enrollment, and exam scores.
-  
-- **Exam Management:**  
-  - Contains tables for `Exam`, `Exam_Question`, and various answer tables (e.g., `Answer_MCQ`, `Answer_Choice`, `Answer_True_False`, `Answer_Written`).
-  
-- **Supporting Objects:**  
-  - Views, stored procedures, synonyms, and user-defined table types facilitate exam management and reporting.
+The system consists of multiple key modules:
 
-## Key Stored Procedures
-- **CreateExam:**  
-  Creates an exam with randomly selected questions based on predefined counts and marks.
-  
-- **CreateExam_Manual:**  
-  Allows instructors to manually select questions for an exam. The procedure validates that the sum of the selected question marks equals the total exam grade and that the questions belong to the appropriate course.
+### Tables
+- **User Management**: Stores user accounts and roles.
+- **Courses**: Contains course details, instructor assignments, and student enrollments.
+- **Exams**: Stores exam metadata (title, type, start time, end time, etc.).
+- **Questions**: Maintains a pool of questions for each course.
+- **Student Answers**: Tracks student responses to exams.
 
-- **InsertStudentAnswers:**  
-  Enables students to submit their answers for exam questions. It supports MCQ, True/False, and Open-Ended questions and prevents duplicate submissions.
+### Stored Procedures
+- **CreateExam_Manual**: Allows manual selection of questions.
+- **CreateExam_Auto**: Generates exams randomly based on predefined parameters.
+- **InsertStudentAnswers**: Handles student answer submissions.
+- **CalcGradeOfExamForStudent**: Computes student grades automatically.
+- **AddStudentsToExam**: Enrolls students in exams.
 
-- **CalcGradeOfExamForStudent:**  
-  Automatically calculates a student's exam score by evaluating answers for MCQ, True/False, and Open-Ended questions (using keyword matching for open-ended questions) and updates the student exam record.
-
-- **AddStudentsToExam:**  
-  Registers a student for a specific exam after validating that the exam and student exist and that the student is not already registered.
+## ERD Diagram
+![ERD Diagram](./path-to-your-image.png)
 
 ## Setup Instructions
-1. **Database Installation:**
-   - Restore or attach the provided database to your SQL Server instance.
-   - Execute the provided SQL scripts to create all tables, stored procedures, views, and user-defined table types.
+1. **Database Installation**
+   - Restore the provided SQL database file.
+   - Run the provided SQL scripts to create all objects.
+2. **User Management**
+   - Assign roles and permissions as needed.
+3. **Backup & Maintenance**
+   - Configure SQL Server Agent for automatic backups.
 
-2. **User Permissions:**
-   - Configure user permissions for instructors and students using SQL Server Management Studio (SSMS) via T-SQL or the GUI.
+## Definitions & Documentation
+For detailed descriptions of **tables, stored procedures, functions, triggers, and views**, refer to the **definitions.txt** file included in the project.
 
-3. **Scheduling Backups:**
-   - Optionally, set up daily backups using SQL Server Agent or Windows Task Scheduler.
+## Accounts & Roles
+| Role              | Permissions |
+|------------------|-------------|
+| Admin           | Full Access |
+| Training Manager | Manage Branches, Tracks, and Students |
+| Instructor      | Manage Courses, Create Exams |
+| Student        | Take Exams, View Results |
 
-## Usage Examples
+## Testing & Validation
+- Sample data is included in the database.
+- Test queries and validation reports are provided in the **TestCases.txt** file.
 
-### Creating an Exam (Manual Selection)
-```sql
-DECLARE @SelectedQuestions AS QuestionTableType;
-INSERT INTO @SelectedQuestions (QuestionId, Mark)
-VALUES (101, 10), (102, 15), (103, 5);
+## Backup Strategy
+- **Daily automated backups** configured using SQL Server Agent.
+- Manual backup scripts are provided for on-demand use.
 
-EXEC CreateExam_Manual
-    @Name = 'Final Exam',
-    @StartTime = '2025-02-10 10:00:00',
-    @EndTime = '2025-02-10 12:00:00',
-    @Type = 'Written',
-    @TotalGradeOfExam = 30,
-    @CourseId = 1,
-    @UserName = 'teacher123',
-    @Password = 'pass123',
-    @Questions = @SelectedQuestions;
-```
-
-### Submitting Answers
-```sql
--- Multiple Choice
-EXEC InsertStudentAnswers
-    @ExamId = 4,
-    @Exam_QuestionId = 19,
-    @McqId = 13,
-    @ChoiceId = 51,
-    @UserName = 'student1',
-    @Password = 'studpass';
-
--- True/False
-EXEC InsertStudentAnswers
-    @ExamId = 4,
-    @Exam_QuestionId = 21,
-    @StudentAnswerTrueFalse = 'False',
-    @UserName = 'student1',
-    @Password = 'studpass';
-
--- Open-Ended
-EXEC InsertStudentAnswers
-    @ExamId = 4,
-    @Exam_QuestionId = 23,
-    @StudentAnswerOpenEnded = 'Photosynthesis converts light energy into chemical energy in plants.',
-    @UserName = 'student1',
-    @Password = 'studpass';
-```
-
-### Grading an Exam
-```sql
-EXEC CalcGradeOfExamForStudent
-    @ExamId = 2,
-    @StudentId = 1,
-    @UserName = 'sarah22',
-    @Password = '159753';
-```
-
-## Entity Relationship Diagram (ERD)
-![ERD Image](path/to/erd-image.png)
+## Additional Documentation
+- [📄 Complete System Documentation](https://github.com/qassemshaban7/Examenation-System-/blob/main/Examination%20System%20DocumentationPDF.pdf)
+- [📜 Database Definitions](https://github.com/qassemshaban7/Examenation-System-/blob/main/Definitions%20and%20Abbreviations.pdf)
 
 
+---
+This document serves as a guide for setting up, using, and maintaining the Examination System. For any additional information, refer to the provided documentation files.
 
