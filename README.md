@@ -77,8 +77,6 @@ For detailed descriptions of **tables, stored procedures, functions, triggers, a
 - Manual backup scripts are provided for on-demand use.
 
 ## Additional Documentation
-convert -density 150 https://github.com/qassemshaban7/Examenation-System-/blob/main/Examination%20System%20DocumentationPDF.pdf -quality 90 docs/page.png
-
 - [📄 Complete System Documentation](https://github.com/qassemshaban7/Examenation-System-/blob/main/Examination%20System%20DocumentationPDF.pdf)
 - [📜 Database Definitions](https://github.com/qassemshaban7/Examenation-System-/blob/main/Definitions%20and%20Abbreviations.pdf)
 
