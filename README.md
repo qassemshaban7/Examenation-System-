@@ -46,7 +46,7 @@ The system consists of multiple key modules:
 - **AddStudentsToExam**: Enrolls students in exams.
 
 ## ERD Diagram
-![ERD Diagram](./path-to-your-image.png)
+![ERD Diagram](https://github.com/qassemshaban7/Examenation-System-/blob/main/ERD.jpg)
 
 ## Setup Instructions
 1. **Database Installation**
